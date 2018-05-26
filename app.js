@@ -23,43 +23,56 @@ app.get('/', function (req, res) {
     res.sendFile(__dirname + '/views/index.html');
 });
 
-app.get('/create.html', function (req, res) {
-    res.sendFile(__dirname + '/views/create.html');
-});
+app.get('/:create', function (req, res) {
+    res.sendFile(__dirname + '/views/' + req.params.create);
 
-app.get('/session.html', function (req, res) {
-    res.sendFile(__dirname + '/views/create.html');
 });
-
-app.get('/create.html', function (req, res) {
-    res.sendFile(__dirname + '/views/create.html');
-});
-
+/*
+ app.get('/session.html', function (req, res) {
+ res.sendFile(__dirname + '/views/create.html');
+ });
+ 
+ app.get('/create.html', function (req, res) {
+ res.sendFile(__dirname + '/views/create.html');
+ });
+ */
 app.post('/join_session', function (req, res) {
     var cursor = db.collection('session_keys').find();
+
+
 
     res.sendFile(__dirname + '/views/raise.html');
 });
 
 app.post('/create_session', function (req, res) {
-    
-    var query = { session_name: req.session_name };
-    var counter = db.collection('session_keys').count(query); 
-    console.log(counter)
-    if(counter == 1){
-        //then the session exists , so reprompt 
-        res.redirect('/create_session.html');
-        console.log('Redirected back to create session')
-    
-    }else{
-       //then the session does not exist and we can create it
-        db.collection('session_keys').save(req.body, function (err, result) {
-        if (err)
-            return console.log(err);
-        console.log('saved to database');
-         });
-     }     
-    
+    console.log(req.body);
+
+    buildSessionKey(req.body.session_name, function (sname) {
+
+
+        var query = { session_name : sname};
+        db.collection('session_keys').count(query, function (err, num) {
+            console.log(query);
+            console.log(num);
+
+            if (num == 1) {
+                //then the session exists , so reprompt 
+                res.redirect('/create_session.html');
+                console.log('Redirected back to create session');
+
+
+
+            } else {
+                //then the session does not exist and we can create it
+                db.collection('session_keys').save(req.body, function (err, result) {
+                    if (err)
+                        return console.log(err);
+                    console.log('saved to database');
+                });
+            }
+        });
+    });
+
 });
 
 app.get('/session.html', function (req, res) {
@@ -71,16 +84,17 @@ app.get('/session.html', function (req, res) {
     });
 });
 
-function buildSessionKey(name) {
-    var counter = db.collection('counter').findOne();
-
-   
+function buildSessionKey(name, callback) {
     db.collection('counter').findOne({}, function (err, document) {
-        console.log(document.value);
+        var newValue = document.value + 1;
+        var update = {$set: {"value": newValue}};
+        db.collection('counter').updateOne({}, update, function (err, res) {
+            var sname = name + '-' + document.value;
+            callback(sname);
+        });
     });
-    
-    return name + '-' + counter.value;
 }
+;
 
 /*
  
