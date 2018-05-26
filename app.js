@@ -81,8 +81,27 @@ app.post('/lead_session', function (req, res) {
     var session_info = req.body;
     doesSessionExist(session_info.session_key, function (bo) {
         if (bo) {
-            console.log('Exists!');
-        } else {
+            var query = {session_key: session_info.session_key};
+            db.collection('session_keys').findOne(query, function (err, document) {
+
+                console.log(document);
+                
+                bcrypt.compare(session_info.password, document.passhash, function (err, res) {
+                    if (res) {
+                        // Passwords match
+                        console.log('Log in.');
+                    } else {
+                        // Passwords don't match
+                        console.log('No log in');
+                    }
+
+                });
+
+
+
+
+            });
+        } else { //Notify non-existence
             console.log('Does not exist.');
         }
     });
@@ -99,18 +118,17 @@ app.get('/session.html', function (req, res) {
 });
 
 function doesSessionExist(session_key, callback) {
-    var boolean = false;
-    var query = {session_name: session_key};
+    var boolExists;
+    var query = {session_key: session_key};
     db.collection('session_keys').count(query, function (err, num) {
         console.log(query);
         console.log(num);
         console.log(session_key);
-        var boolExists
         if (num == 1) {
-//then the session exists , so reprompt 
+            //then the session exists , so reprompt 
             boolExists = true;
         } else {
-//then the session does not exist
+            //then the session does not exist
             boolExists = false;
         }
 
