@@ -42,22 +42,24 @@ app.post('/join_session', function (req, res) {
 });
 
 app.post('/create_session', function (req, res) {
-    db.collection('session_keys').save(req.body, function (err, result) {
+    
+    var query = { session_name: req.session_name };
+    var counter = db.collection('session_keys').count(query); 
+    console.log(counter)
+    if(counter == 1){
+        //then the session exists , so reprompt 
+        res.redirect('/create_session.html');
+        console.log('Redirected back to create session')
+    
+    }else{
+       //then the session does not exist and we can create it
+        db.collection('session_keys').save(req.body, function (err, result) {
         if (err)
             return console.log(err);
         console.log('saved to database');
-    });
-
-    var query = { session_name: "First" };
+         });
+     }     
     
-    db.collection('session_keys').find(query).toArray(function (err, res) {
-        if (err)
-            return console.log(err);
-        console.log(res);
-    });
-    
-    res.redirect('/session.html');
-        res.sendFile(__dirname + '/views/session.html');
 });
 
 app.get('/session.html', function (req, res) {
