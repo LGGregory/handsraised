@@ -43,10 +43,11 @@ app.post('/join_session', function (req, res) {
 
 app.post('/create_session', function (req, res) {
     
-    var query = { session_name: req.session_name };
-    var counter = db.collection('session_keys').count(query); 
-    console.log(counter)
-    if(counter == 1){
+    var query = { session_name: req.body.session_name };
+    db.collection('session_keys').count(query, function (err, value) {
+    console.log(value);  
+   
+    if( value== 1){
         //then the session exists , so reprompt 
         res.redirect('/create_session.html');
         console.log('Redirected back to create session')
@@ -59,7 +60,7 @@ app.post('/create_session', function (req, res) {
         console.log('saved to database');
          });
      }     
-    
+    });
 });
 
 app.get('/session.html', function (req, res) {
