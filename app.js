@@ -79,9 +79,13 @@ app.post('/create_session', function (req, res) {
 
 app.post('/lead_session', function (req, res) {
     var session_info = req.body;
-
-
-
+    doesSessionExist(session_info.session_key, function (bo) {
+        if (bo) {
+            console.log('Exists!');
+        } else {
+            console.log('Does not exist.');
+        }
+    });
 });
 
 
@@ -94,33 +98,28 @@ app.get('/session.html', function (req, res) {
     });
 });
 
-
-
-
-
-function doesSessionExist(session_key, callback){
-    var boolean = false;          
+function doesSessionExist(session_key, callback) {
+    var boolean = false;
     var query = {session_name: session_key};
     db.collection('session_keys').count(query, function (err, num) {
         console.log(query);
         console.log(num);
         console.log(session_key);
-
+        var boolExists
         if (num == 1) {
-            //then the session exists , so reprompt 
-            const boolExists = true;   
-        
-        }else{
-           //then the session does not exist
-           boolExists = false;
-           
+//then the session exists , so reprompt 
+            boolExists = true;
+        } else {
+//then the session does not exist
+            boolExists = false;
         }
 
-    callback(boolExists);
+        callback(boolExists);
+    });
 }
 
 function buildSessionKey(name, callback) {
-    // Check if string exists to grow? Counter per string?
+// Check if string exists to grow? Counter per string?
     db.collection('counter').findOne({}, function (err, document) {
         var newValue = document.value + 1;
         var update = {$set: {"value": newValue}};
@@ -131,9 +130,7 @@ function buildSessionKey(name, callback) {
     });
 }
 
-<<<<<<< HEAD
 
-=======
 function initSession(body, callback) {
     bcrypt.hash('myPassword', 10, function (err, hash) {
         db.collection(body.session_key).insert();
@@ -143,4 +140,4 @@ function initSession(body, callback) {
 function endSession(session_key, callback) {
     callback(db.collection(session_key).drop());
 }
->>>>>>> 61aff4b6d5af602c478514964fe42274e8571b6b
+
