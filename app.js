@@ -141,9 +141,11 @@ function doesSessionExist(session_key, callback) {
     var boolExists;
     var query = {session_key: session_key};
     db.collection('session_keys').count(query, function (err, num) {
+        console.log('LOOK HERE');
         console.log(query);
         console.log(num);
         console.log(session_key);
+        console.log('LOOK END');
         if (num == 1) {
             //then the session exists , so reprompt 
             boolExists = true;
