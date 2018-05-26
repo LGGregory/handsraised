@@ -38,10 +38,30 @@ app.get('/:create', function (req, res) {
  });
  */
 app.post('/join_session', function (req, res) {
-    var cursor = db.collection('session_keys').find();
+    const session_key = req.body.session_key;
+    console.log(session_key);   
+    doesSessionExist(session_key, function (bo) {
+        var query = {student_name: req.body.student_name};
+        db.collection(session_key).count(query, function (err, num) { //TODO: Students Rejoin maybe?
+            if (num == 0) {
+                db.collection(session_key).save(req.body, function (err, res) {
+                    if (err)
+                        return console.log(err);
+ 
+                    console.log('Stored ' + req.body.student_name + " in " + session_key);
+
+                });
+            }
+
+
+        });
+
+
+    });
 
 
 
+//db.collection(req.body.session_key).find(query).toArray(function(err, results))
     res.sendFile(__dirname + '/views/raise.html');
 });
 
@@ -66,7 +86,7 @@ app.post('/create_session', function (req, res) {
 
                 } else {
                     //then the session does not exist and we can create it
-                    db.collection('session_keys').save(session_info, function (err, result) {
+                    db.collection('session_keys').save(session_info, function (err, res) {
                         if (err)
                             return console.log(err);
                         console.log('saved to database');
@@ -85,7 +105,7 @@ app.post('/lead_session', function (req, res) {
             db.collection('session_keys').findOne(query, function (err, document) {
 
                 console.log(document);
-                
+
                 bcrypt.compare(session_info.password, document.passhash, function (err, res) {
                     if (res) {
                         // Passwords match
