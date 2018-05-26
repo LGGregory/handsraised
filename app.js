@@ -78,6 +78,7 @@ app.post('/create_session', function (req, res) {
 
 });
 
+
 app.get('/session.html', function (req, res) {
     res.sendFile(__dirname + '/views/session.html');
     db.collection('session_keys').find().toArray(function (err, res) {
@@ -86,6 +87,31 @@ app.get('/session.html', function (req, res) {
         console.log(res);
     });
 });
+
+
+
+
+
+function doesSessionExist(session_key, callback){
+    var boolean = false;          
+    var query = {session_name: session_key};
+    db.collection('session_keys').count(query, function (err, num) {
+        console.log(query);
+        console.log(num);
+        console.log(session_key);
+
+        if (num == 1) {
+            //then the session exists , so reprompt 
+            const boolExists = true;   
+        
+        }else{
+           //then the session does not exist
+           boolExists = false;
+           
+        }
+
+    callback(boolExists);
+}
 
 function buildSessionKey(name, callback) {
     db.collection('counter').findOne({}, function (err, document) {
@@ -99,41 +125,4 @@ function buildSessionKey(name, callback) {
 }
 ;
 
-/*
- 
- app.get('/:dateParam', function(req, res){
- var dateParam = req.params.dateParam;
- 
- if(Number(dateParam)){
- var date = "3";
- 
- if(date != "Invalid date"){
- res.json({
- unix: dateParam,
- natural: date
- });
- } else{
- res.json({
- unix: null,
- natural: null
- });
- }
- }
- 
- else{
- var date = "3";
- if(date){
- res.json({
- unix: date.unix(),
- natural: date.format("MMMM D, YYYY")
- });
- }
- else{
- res.json({
- unix: null,
- natural: null
- });
- }
- }
- });
- */
+
