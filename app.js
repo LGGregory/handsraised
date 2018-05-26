@@ -45,6 +45,7 @@ app.post('/join_session', function (req, res) {
 });
 
 app.post('/create_session', function (req, res) {
+
     console.log(req.body);
 
     buildSessionKey(req.body.session_name, function (sname) {
