@@ -23,13 +23,16 @@ app.get('/', function (req, res) {
     res.sendFile(__dirname + '/views/index.html');
 });
 
-
+app.get('/create.html', function (req, res) {
+    res.sendFile(__dirname + '/views/create.html');
+});
 app.post('/join_session', function (req, res) {
+    res.sendFile(__dirname + '/views/raise.html');
+});
 
-    console.log(req.body);
 
-
-
+app.post('/create_session', function (req, res) {
+    res.sendFile(__dirname + '/views/session.html');
 });
 
 
