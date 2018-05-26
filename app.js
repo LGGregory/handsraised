@@ -50,22 +50,24 @@ app.post('/create_session', function (req, res) {
 
     buildSessionKey(req.body.session_name, function (sname) {
 
+        var session_info = req.body;
 
-        var query = { session_name : sname};
+        var query = {session_name: sname};
         db.collection('session_keys').count(query, function (err, num) {
             console.log(query);
             console.log(num);
+            
+            session_info.session_key = sname;
+            console.log(session_info);
 
             if (num == 1) {
                 //then the session exists , so reprompt 
                 res.redirect('/create_session.html');
                 console.log('Redirected back to create session');
 
-
-
             } else {
                 //then the session does not exist and we can create it
-                db.collection('session_keys').save(req.body, function (err, result) {
+                db.collection('session_keys').save(session_info, function (err, result) {
                     if (err)
                         return console.log(err);
                     console.log('saved to database');
