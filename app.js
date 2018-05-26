@@ -39,24 +39,20 @@ app.get('/:create', function (req, res) {
  */
 app.post('/join_session', function (req, res) {
     const session_key = req.body.session_key;
-    console.log(session_key);   
+    console.log(session_key);
     doesSessionExist(session_key, function (bo) {
-        var query = {student_name: req.body.student_name};
-        db.collection(session_key).count(query, function (err, num) { //TODO: Students Rejoin maybe?
-            if (num == 0) {
-                db.collection(session_key).save(req.body, function (err, res) {
-                    if (err)
-                        return console.log(err);
- 
-                    console.log('Stored ' + req.body.student_name + " in " + session_key);
-
-                });
-            }
-
-
-        });
-
-
+        if (bo) {
+            var query = {student_name: req.body.student_name};
+            db.collection(session_key).count(query, function (err, num) { //TODO: Students Rejoin maybe?
+                if (num === 0) {
+                    db.collection(session_key).save(req.body, function (err, res) {
+                        if (err)
+                            return console.log(err);
+                        console.log('Stored ' + req.body.student_name + " in " + session_key);
+                    });
+                }
+            });
+        }
     });
 
 
