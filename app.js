@@ -1,8 +1,9 @@
 'use strict';
-var express = require('express');
-var bodyParser = require('body-parser');
-var app = express();
-var mongoURL = 'mongodb://handsraised:RUHacks2018@ds135750.mlab.com:35750/handsraised';
+const bcrypt = require('bcrypt');
+const express = require('express');
+const bodyParser = require('body-parser');
+const app = express();
+const mongoURL = 'mongodb://handsraised:RUHacks2018@ds135750.mlab.com:35750/handsraised';
 app.use(bodyParser.urlencoded({extended: true}));
 
 var MongoClient = require('mongodb').MongoClient;
@@ -45,36 +46,41 @@ app.post('/join_session', function (req, res) {
 });
 
 app.post('/create_session', function (req, res) {
+    var session_info = req.body;
+    bcrypt.hash(session_info.password, 10, function (err, hash) {
+        if (err)
+            return console.log(err);
+        delete session_info["password"];
+        session_info.passhash = hash;
+        buildSessionKey(session_info.session_name, function (sname) {
+            var query = {session_name: sname};
+            db.collection('session_keys').count(query, function (err, num) {
 
-    console.log(req.body);
+                session_info.session_key = sname;
+                console.log(session_info);
 
-    buildSessionKey(req.body.session_name, function (sname) {
+                if (num != 0) {
+                    //then the session exists , so reprompt 
+                    res.redirect('/create_session.html');
+                    console.log('Redirected back to create session');
 
-        var session_info = req.body;
-
-        var query = {session_name: sname};
-        db.collection('session_keys').count(query, function (err, num) {
-            console.log(query);
-            console.log(num);
-            
-            session_info.session_key = sname;
-            console.log(session_info);
-
-            if (num == 1) {
-                //then the session exists , so reprompt 
-                res.redirect('/create_session.html');
-                console.log('Redirected back to create session');
-
-            } else {
-                //then the session does not exist and we can create it
-                db.collection('session_keys').save(session_info, function (err, result) {
-                    if (err)
-                        return console.log(err);
-                    console.log('saved to database');
-                });
-            }
+                } else {
+                    //then the session does not exist and we can create it
+                    db.collection('session_keys').save(session_info, function (err, result) {
+                        if (err)
+                            return console.log(err);
+                        console.log('saved to database');
+                    });
+                }
+            });
         });
     });
+});
+
+app.post('/lead_session', function (req, res) {
+    var session_info = req.body;
+
+
 
 });
 
@@ -114,6 +120,7 @@ function doesSessionExist(session_key, callback){
 }
 
 function buildSessionKey(name, callback) {
+    // Check if string exists to grow? Counter per string?
     db.collection('counter').findOne({}, function (err, document) {
         var newValue = document.value + 1;
         var update = {$set: {"value": newValue}};
@@ -123,6 +130,17 @@ function buildSessionKey(name, callback) {
         });
     });
 }
-;
 
+<<<<<<< HEAD
 
+=======
+function initSession(body, callback) {
+    bcrypt.hash('myPassword', 10, function (err, hash) {
+        db.collection(body.session_key).insert();
+    });
+}
+
+function endSession(session_key, callback) {
+    callback(db.collection(session_key).drop());
+}
+>>>>>>> 61aff4b6d5af602c478514964fe42274e8571b6b
