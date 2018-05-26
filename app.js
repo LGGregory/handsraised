@@ -71,6 +71,17 @@ app.get('/session.html', function (req, res) {
     });
 });
 
+function buildSessionKey(name) {
+    var counter = db.collection('counter').findOne();
+
+   
+    db.collection('counter').findOne({}, function (err, document) {
+        console.log(document.value);
+    });
+    
+    return name + '-' + counter.value;
+}
+
 /*
  
  app.get('/:dateParam', function(req, res){
