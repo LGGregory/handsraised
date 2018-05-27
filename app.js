@@ -273,8 +273,13 @@ app.post('/answer_student', function (req, res) {
 });
 
 function displayRaise(session_key, student_name, page) {
-    db.collection(session_key).findOne({student_name: student_name}, function (err, document) {
-        page.render('raise.ejs', {data: document});
+    db.collection('session_keys').findOne({session_key:session_key}, function (err, sess) {
+        if (err)
+            return console.log(err);
+        db.collection(session_key).findOne({student_name: student_name}, function (err, document) {
+            document.session_name=sess.session_name;
+            page.render('raise.ejs', {data: document});
+        });
     });
 }
 

@@ -1,42 +1,165 @@
-<html>
-	<head>
-	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<html lang="en">
+
+  <head>
+
+    <meta charset="utf-8">
 	<meta http-equiv="refresh" content="10" /> 
-	<title>
-		Session
-	</title>
-	</head>
-	<body>
-	<h1>Session Code: <u><%= data.session_name %></u></h1><br>
-	<h2>Session Code: <u><%= data.session_key %></u></h2><br><br><br>
-	<div name="students">
-		<table name="student_table">
-		<% for(var i = 0; i<data.raised.length; i++) {%>
-		<form action="/answer_student" method="POST">
-		<tr>
-			<td name="student_number">
-				<%= i+1%>
-			</td>
-			<td name="student_name">
-				<%= data.raised[i].student_name %>
-			</td>
-			<td>
-				<input type="hidden" name="student_name" value="<%= data.raised[i].student_name %>">
-				<input type="hidden" name="session_key" value="<%= data.session_key %>">
-				<button type="submit" >Answer</button>
-			</td>
-		</tr>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Hands Raised - <%= data.session_name %></title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom fonts for this template -->
+    <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="vendor/simple-line-icons/css/simple-line-icons.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
+
+    <!-- Custom styles for this template -->
+    <link href="css/landing-page.css" rel="stylesheet">
+
+  </head>
+
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-light bg-light static-top">
+      <div class="container">
+        <a class="navbar-brand" href="#">Hands Raised</a>
+		<form action="/end_session" method="POST">
+		<input type="hidden" name="session_key" value="<%= data.session_key %>">
+        <button type="submit" class="btn btn-info" href="#">End Session</button>
 		</form>
-		<% } %>
-		</table>
+      </div>
+    </nav>
+
+    <!-- Masthead -->
+    <header class="masthead text-white text-center">
+      <div class="overlay"></div>
+      <div class="container">
+        <div class="row">
+          <div class="col-xl-9 mx-auto">
+            <h2 class="mb-5"><%= data.session_name %></h2>
+          </div>
+		  <div class="col-xl-5 mx-auto">
+            <h4 class="mb-5">Session Code: <u><%= data.session_key %></u></h4>
+          </div>
+          <div class="col-md-10 col-lg-8 col-xl-7 mx-auto">
+            
+          </div>
+        </div>
+      </div>
+	  
+    </header>
+	<section class="bg-light">
+	<div class="mainbutton">
+		<form action="/end_session" method="POST">
+              <div >
+                <input type="hidden" name="session_key" value="<%= data.session_key %>">
+                <div >
+                  <button type="submit" class="btn btn-block btn-lg btn-info">End Session</button>
+                </div>
+              </div>
+            </form>
+			</div>
+			</section>
+    <section class="bg-light">
+	<div class="container">
+	<div>
+		<div name="students">
+			<table id="students" name="student_table" cellspacing="30">
+			<tr>
+				
+			<th>
+				Position
+			</th>
+			<th>
+				Student Name
+			</th>
+			<th>
+				Answer
+			</th>
+			</tr>
+		<% for(var i = 0; i<data.raised.length; i++) {%>
+			<form action="/answer_student" method="POST">
+			<tr>
+				<td name="student_number">
+					<%= i+1%>
+				</td>
+				<td name="student_name">
+					<%= data.raised[i].student_name %>
+				</td>
+				<td>
+					<input type="hidden" name="student_name" value="<%= data.raised[i].student_name %>">
+					<input type="hidden" name="session_key" value="<%= data.session_key %>">
+					<button type="submit" >Answer</button>
+				</td>
+			</tr>
+			</form>
+			<% } %>
+			</table>
+		</div>
 	</div>
-	<br>
-	<br>
-			
-	<form action="/end_session" method="POST">
-	<input type="hidden" name="session_key" value="<%= data.session_key %>">
-	<button type="submit">End Session</button>
-	</form>
+	</div>
+	</section>
+	<section>
 	
-	</body>
+	</section>
+
+
+    <!-- Footer -->
+    <footer class="footer ">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-6 text-center text-lg-left my-auto">
+            <ul class="list-inline mb-2">
+              <li class="list-inline-item">
+                <a href="#">About</a>
+              </li>
+              <li class="list-inline-item">&sdot;</li>
+              <li class="list-inline-item">
+                <a href="#">Contact</a>
+              </li>
+              <li class="list-inline-item">&sdot;</li>
+              <li class="list-inline-item">
+                <a href="#">Terms of Use</a>
+              </li>
+              <li class="list-inline-item">&sdot;</li>
+              <li class="list-inline-item">
+                <a href="#">Privacy Policy</a>
+              </li>
+            </ul>
+            <p class="text-muted small mb-4 mb-lg-0">&copy; Your Website 2018. All Rights Reserved.</p>
+          </div>
+          <div class="col-lg-6 h-100 text-center text-lg-right my-auto">
+            <ul class="list-inline mb-0">
+              <li class="list-inline-item mr-3">
+                <a href="#">
+                  <i class="fa fa-facebook fa-2x fa-fw"></i>
+                </a>
+              </li>
+              <li class="list-inline-item mr-3">
+                <a href="#">
+                  <i class="fa fa-twitter fa-2x fa-fw"></i>
+                </a>
+              </li>
+              <li class="list-inline-item">
+                <a href="#">
+                  <i class="fa fa-instagram fa-2x fa-fw"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  </body>
+
 </html>
