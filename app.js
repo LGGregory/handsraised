@@ -44,7 +44,6 @@ MongoClient.connect(mongoURL, function (err, client) {
 
 
 app.get('/', function (req, res) {
-
     res.render('index.ejs');
 });
 
@@ -61,11 +60,12 @@ app.post('/join_session', function (req, res) {
             var query = {student_name: req.body.student_name};
             db.collection(session_key).count(query, function (err, num) { //TODO: Students Rejoin maybe?
                 if (num === 0) {
-                    db.collection(session_key).save(req.body, function (err, res) {
+                    db.collection(session_key).save(req.body, function (err, data) {
                         if (err)
                             return console.log(err);
+                        console.log(data.ops);
                         console.log('Stored ' + req.body.student_name + " in " + session_key);
-
+                        res.render('raise.ejs', {data: req.body});
                     });
                 }
             });
@@ -73,7 +73,7 @@ app.post('/join_session', function (req, res) {
     });
 
 //db.collection(req.body.session_key).find(query).toArray(function(err, results))
-    res.render('raise.ejs', );
+
 });
 
 function displaySession(session_key, res, callback) {
@@ -182,10 +182,16 @@ app.post('/lead_session', function (req, res) {
 
 app.post('/raise_hand', function (req, res) {
     var session_info = req.body;
-    
-    
-    res.render('raise.ejs', {data: data});
+    var query = {student_name: session_info.student_name};
+    var hand = {raised: true};
+    hand.time = (new Date()).getTime();
+    var update = {$set: hand};
+    db.collection(session_info.session_key).updateOne(query, update, function (err, data) {
+        if (err)
+            console.log(err);
+        res.render('raise.ejs', {data: data});
 
+    });
 });
 
 app.get('/session.html', function (req, res) {
