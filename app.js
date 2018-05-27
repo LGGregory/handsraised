@@ -65,7 +65,7 @@ app.post('/join_session', function (req, res) {
                         if (err)
                             return console.log(err);
                         console.log('Stored ' + req.body.student_name + " in " + session_key);
-
+             
                     });
                 }
             });
@@ -73,7 +73,7 @@ app.post('/join_session', function (req, res) {
     });
 
 //db.collection(req.body.session_key).find(query).toArray(function(err, results))
-    res.render('raise.ejs', );
+  res.render('raise.ejs', );
 });
 
 function displaySession(session_key, res, callback) {
