@@ -1,71 +1,70 @@
 'use strict';
+const url = require('url-parse');
 const bcrypt = require('bcrypt');
 const express = require('express');
 const bodyParser = require('body-parser');
-
 var session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const mongoURL = 'mongodb://handsraised:RUHacks2018@ds135750.mlab.com:35750/handsraised';
 const app = express();
 
-
 app.use(bodyParser.urlencoded({extended: true}));
-
 
 app.set('view engine', 'ejs');
 
 var MongoClient = require('mongodb').MongoClient;
 var port = process.env.PORT || 3000;
 var db;
+
 MongoClient.connect(mongoURL, function (err, client) {
     if (err)
         return console.log(err);
     db = client.db('handsraised');
 
+
+
     app.listen(port, function () {
         console.log("server is running on port " + port);
     });
 
-    app.use(session({
-        secret: 'handsraised'
-    }));
-/*,
-        store: new MongoStore({
-            db: db,
-            touchAfter: 24 * 3600 // time period in seconds
-        })
-*/
+    /*,
+     store: new MongoStore({
+     db: db,
+     touchAfter: 24 * 3600 // time period in seconds
+     })
+     */
 });
 
-
+app.use(session({
+    secret: 'handsraised'
+}));
 
 app.get('/', function (req, res) {
     res.render('index.ejs');
 });
+/*
+ app.get('/:create', function (req, res) {
+ res.sendFile(__dirname + '/views/' + req.params.create);
+ 
+ });*/
 
-app.get('/:create', function (req, res) {
-    res.sendFile(__dirname + '/views/' + req.params.create);
 
-});
 
 app.post('/join_session', function (req, res) {
     const session_key = req.body.session_key;
-    console.log(session_key);
+    var session_info = req.body;
     doesSessionExist(session_key, function (bo) {
         if (bo) {
-            var query = {student_name: req.body.student_name};
+            var query = {student_name: session_info.student_name};
             db.collection(session_key).count(query, function (err, num) { //TODO: Students Rejoin maybe?
                 if (num === 0) {
-                    db.collection(session_key).save(req.body, function (err, data) {
+                    db.collection(session_key).save(session_info, function (err, data) {
                         if (err)
                             return console.log(err);
-                        console.log(data.ops);
-                        console.log('Stored ' + req.body.student_name + " in " + session_key);
-<<<<<<< HEAD
-             
-=======
-                        res.render('raise.ejs', {data: req.body});
->>>>>>> 4a88bedd479eaa244470ded21d5d9ad23ad16dd8
+                        req.session.session_key = session_info.session_key;
+                        req.session.student_name = session_info.student_name;
+                        displayRaise(session_info.session_key, session_info.student_name, res);
+                        console.log(">" + session_info.student_name + " joined " + session_info.session_key);
                     });
                 }
             });
@@ -73,20 +72,21 @@ app.post('/join_session', function (req, res) {
     });
 
 //db.collection(req.body.session_key).find(query).toArray(function(err, results))
-<<<<<<< HEAD
-  res.render('raise.ejs', );
-=======
 
->>>>>>> 4a88bedd479eaa244470ded21d5d9ad23ad16dd8
 });
 
 function displaySession(session_key, res, callback) {
     db.collection('session_keys').findOne({session_key: session_key}, function (err, data) {
         if (err)
             return console.log(err);
-        db.collection(session_key).find({hand: 'raised'}).toArray(function (err, raised) { //TODO: true false 
+        //hand : {raised : true}
+
+        var query = {hand: {$exists: true}};
+
+        db.collection(session_key).find(query).toArray(function (err, raised) { //TODO: true false 
             if (err)
                 return console.log(err);
+            console.log(raised);
             data.raised = raised;
             res.render('session.ejs', {data: data});
 
@@ -99,6 +99,10 @@ function displaySession(session_key, res, callback) {
 }
 
 app.post('/create_session', function (req, res) {
+    /* var root = url(req.url).pathname.split('/')[1];
+     res.writeHead(301,
+     {Location: root+'session.ejs'}
+     );*/
     console.log('--------------------------------------');
     console.log(req.session);
     var session_info = req.body;
@@ -125,7 +129,7 @@ app.post('/create_session', function (req, res) {
                         if (err)
                             return console.log(err);
                         console.log('saved to database');
-                        req.session.session_key=session_info.session_key;
+                        req.session.session_key = session_info.session_key;
                         renderSession(session_info.session_key, res);
                         // displaySession(session_info.session_key, res);
                     });
@@ -137,12 +141,16 @@ app.post('/create_session', function (req, res) {
     });
 });
 
-app.get('/session.ejs', function (req, res) {
+app.get('/create_session', function (req, res) {
     if (req.session.session_key) {
         displaySession(req.session.session_key, res);
     } else {
         res.end('How did you get here? <a href="index.ejs">Go Home.</a>');
     }
+});
+
+app.get('/create.html', function (req, res) {
+    res.sendFile(__dirname + '/views/' + 'create.html');
 });
 
 function renderSession(session_key, page) {
@@ -174,7 +182,7 @@ app.post('/lead_session', function (req, res) {
                     if (ret) {
                         // Passwords match
                         console.log('Log in.');
-                        req.session.session_key=session_info.session_key;
+                        req.session.session_key = session_info.session_key;
                         displaySession(session_info.session_key, res);
                     } else {
                         // Passwords don't match
@@ -193,9 +201,25 @@ app.post('/lead_session', function (req, res) {
     });
 });
 
-app.get('session.ejs', function (req, res) {
-    var session_info = req.body;
+app.get('/raise_hand', function (req, res) {
+    if (req.session.session_key && req.session.student_name) {
+        displayRaise(req.session.session_key, req.session.student_name, res);
+    } else {
+        res.end('How did you get here? <a href="index.ejs">Go Home.</a>');
+    }
 
+});
+
+app.get('/login.html', function (req, res) {
+    res.sendFile(__dirname + '/views/' + 'login.html');
+});
+
+app.get('/lead_session', function (req, res) {
+    if (req.session.session_key) {
+        displaySession(req.session.session_key, res);
+    } else {
+        res.end('How did you get here? <a href="index.ejs">Go Home.</a>');
+    }
 });
 
 app.post('/raise_hand', function (req, res) {
@@ -209,7 +233,7 @@ app.post('/raise_hand', function (req, res) {
             console.log(err);
         console.log('-----------------------------------------------------------------------------');
         console.log(data);
-        renderRaise(session_info.session_key, session_info.student_name, res);
+        displayRaise(session_info.session_key, session_info.student_name, res);
 
 
     });
@@ -230,7 +254,7 @@ app.get('/session.html', function (req, res) {
  * @param student_name
  * @param page
  */
-function renderRaise(session_key, student_name, page) {
+function displayRaise(session_key, student_name, page) {
     db.collection(session_key).findOne({student_name: student_name}, function (err, document) {
         console.log(document);
         page.render('raise.ejs', {data: document});
