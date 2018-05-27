@@ -50,10 +50,11 @@
     <nav class="navbar navbar-light bg-light static-top">
       <div class="container">
         <a class="navbar-brand" href="#">Hands Raised</a>
-		<!--<form action="/end_session" method="POST">
-		<input type="hidden" name="session_key" value="<%= data.session_key %>">
-        <button type="submit" class="btn btn-info" href="#">End Session</button>
-		</form>-->
+		<form action="/leave_session" method="POST">
+			<input type="hidden" name="student_name" value="<%= data.student_name %>">
+			<input type="hidden" name="session_key" value="<%= data.session_key %>">
+			<button type="submit" class="btn btn-info" href="#">Leave Session</button>
+		</form>
       </div>
     </nav>
 
@@ -117,7 +118,7 @@
                 <a href="#">Privacy Policy</a>
               </li>
             </ul>
-            <p class="text-muted small mb-4 mb-lg-0">&copy; Your Website 2018. All Rights Reserved.</p>
+            <p class="text-muted small mb-4 mb-lg-0">&copy; Team HandsRaised 2018. All Rights Reserved.</p>
           </div>
           <div class="col-lg-6 h-100 text-center text-lg-right my-auto">
             <ul class="list-inline mb-0">

@@ -99,6 +99,17 @@ function displaySession(session_key, res, callback) {
 
 }
 
+app.post('/leave_session', function(req, res){
+    var session_info = req.body;
+    var query = {student_name:session_info.student_name};
+    db.collection(session_info.session_key).deleteOne(query, function(err, result){
+        if(err)
+            return console.log(err);
+        
+    });
+    res.redirect('/');
+});
+
 app.post('/create_session', function (req, res) {
     var session_info = req.body;
     bcrypt.hash(session_info.password, 10, function (err, hash) {
@@ -132,7 +143,7 @@ app.get('/create_session', function (req, res) {
     if (req.session.session_key) {
         res.redirect('/run_session');
     } else {
-        res.end('<html><body><h3>Session Timed Out.</h3><br><br><a href="/">Go Home.</a></body></html>');
+        res.sendFile(__dirname + '/views/'+ 'error.html');
     }
 });
 
@@ -164,7 +175,7 @@ app.post('/end_session', function (req, res) {
 
 });
 
-function renderSession(session_key, page) {
+function renderSession(session_key, page) { //never used, old name
     db.collection('session_keys').findOne({session_key: session_key}, function (err, data) {
         if (err)
             return console.log(err);
@@ -214,7 +225,7 @@ app.get('/raise_hand', function (req, res) {
         });
 
     } else {
-        res.end('How did you get here? <a href="index.ejs">Go Home.</a>');
+        res.sendFile(__dirname + '/views/'+ 'error.html');
     }
 
 });
@@ -231,7 +242,7 @@ app.get('/lead_session', function (req, res) {
     if (req.session.session_key) {
         res.redirect('/run_session');
     } else {
-        res.end('How did you get here? <a href="index.ejs">Go Home.</a>');
+        res.sendFile(__dirname + '/views/'+ 'error.html');
     }
 });
 
@@ -239,7 +250,14 @@ app.get('/run_session', function (req, res) {
     if (req.session.session_key) {
         displaySession(req.session.session_key, res);
     } else {
-        res.end('How did you get here? <a href="index.ejs">Go Home.</a>');
+        res.sendFile(__dirname + '/views/'+ 'error.html');
+    }
+});
+
+app.get('/join_Session', function(req, res){
+    if (req.session.session_key) {
+        
+        res.redirect('/raise_hand');
     }
 });
 
@@ -278,6 +296,7 @@ function displayRaise(session_key, student_name, page) {
             return console.log(err);
         db.collection(session_key).findOne({student_name: student_name}, function (err, document) {
             document.session_name=sess.session_name;
+            document.session_key=session_key;
             page.render('raise.ejs', {data: document});
         });
     });
