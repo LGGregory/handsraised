@@ -2,11 +2,11 @@
 const bcrypt = require('bcrypt');
 const express = require('express');
 const bodyParser = require('body-parser');
-const app = express();
-const session = require('express-session');
+
+var session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const mongoURL = 'mongodb://handsraised:RUHacks2018@ds135750.mlab.com:35750/handsraised';
-
+const app = express();
 
 
 app.use(bodyParser.urlencoded({extended: true}));
@@ -27,15 +27,14 @@ MongoClient.connect(mongoURL, function (err, client) {
     });
 
     app.use(session({
-        secret: 'handsraised',
-        saveUninitialized: false, // don't create session until something stored
-        resave: false, //don't save session if unmodified
+        secret: 'handsraised'
+    }));
+/*,
         store: new MongoStore({
             db: db,
             touchAfter: 24 * 3600 // time period in seconds
         })
-    }));
-
+*/
 });
 
 
@@ -92,6 +91,8 @@ function displaySession(session_key, res, callback) {
 }
 
 app.post('/create_session', function (req, res) {
+    console.log('--------------------------------------');
+    console.log(req.session);
     var session_info = req.body;
     bcrypt.hash(session_info.password, 10, function (err, hash) {
         if (err)
@@ -130,16 +131,10 @@ app.post('/create_session', function (req, res) {
 
 app.get('/session.ejs', function (req, res) {
     if (req.session.session_key) {
-
         displaySession(req.session.session_key, res);
-
-
-
     } else {
         res.end('How did you get here? <a href="index.ejs">Go Home.</a>');
     }
-
-
 });
 
 function renderSession(session_key, page) {
