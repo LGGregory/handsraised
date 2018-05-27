@@ -61,7 +61,11 @@ app.post('/join_session', function (req, res) {
                             return console.log(err);
                         console.log(data.ops);
                         console.log('Stored ' + req.body.student_name + " in " + session_key);
+<<<<<<< HEAD
+             
+=======
                         res.render('raise.ejs', {data: req.body});
+>>>>>>> 4a88bedd479eaa244470ded21d5d9ad23ad16dd8
                     });
                 }
             });
@@ -69,7 +73,11 @@ app.post('/join_session', function (req, res) {
     });
 
 //db.collection(req.body.session_key).find(query).toArray(function(err, results))
+<<<<<<< HEAD
+  res.render('raise.ejs', );
+=======
 
+>>>>>>> 4a88bedd479eaa244470ded21d5d9ad23ad16dd8
 });
 
 function displaySession(session_key, res, callback) {
@@ -233,9 +241,11 @@ function doesSessionExist(session_key, callback) {
     var boolExists;
     var query = {session_key: session_key};
     db.collection('session_keys').count(query, function (err, num) {
+        console.log('LOOK HERE');
         console.log(query);
         console.log(num);
         console.log(session_key);
+        console.log('LOOK END');
         if (num == 1) {
             //then the session exists , so reprompt 
             boolExists = true;
