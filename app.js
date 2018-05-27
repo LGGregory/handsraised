@@ -29,7 +29,7 @@ MongoClient.connect(mongoURL, function (err, client) {
     app.use(session({
         secret: 'handsraised',
         genid: function (req) {
-            return genuuid() // use UUIDs for session IDs
+            return genuuid(); // use UUIDs for session IDs
         },
         saveUninitialized: false, // don't create session until something stored
         resave: false, //don't save session if unmodified
@@ -66,27 +66,21 @@ app.post('/join_session', function (req, res) {
                             return console.log(err);
                         console.log('Stored ' + req.body.student_name + " in " + session_key);
 
-
-
-
-
                     });
                 }
             });
         }
     });
 
-
-
 //db.collection(req.body.session_key).find(query).toArray(function(err, results))
-    res.sendFile(__dirname + '/views/raise.html');
+    res.render('raise.ejs', );
 });
 
 function displaySession(session_key, res, callback) {
     db.collection('session_keys').findOne({session_key: session_key}, function (err, data) {
         if (err)
             return console.log(err);
-        db.collection(session_key).find({hand: 'raised'}).toArray(function (err, raised) {
+        db.collection(session_key).find({hand: 'raised'}).toArray(function (err, raised) { //TODO: true false 
             if (err)
                 return console.log(err);
             data.raised = raised;
@@ -97,7 +91,6 @@ function displaySession(session_key, res, callback) {
         });
 
     });
-
 
 }
 
@@ -135,7 +128,7 @@ app.post('/create_session', function (req, res) {
                                 data.raised = raised;
                                 res.render('session.ejs', {data: data});
 
-                                
+
                             });
 
                         });
@@ -187,6 +180,13 @@ app.post('/lead_session', function (req, res) {
     });
 });
 
+app.post('/raise_hand', function (req, res) {
+    var session_info = req.body;
+    
+    
+    res.render('raise.ejs', {data: data});
+
+});
 
 app.get('/session.html', function (req, res) {
     res.sendFile(__dirname + '/views/session.html');
