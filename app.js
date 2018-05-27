@@ -11,7 +11,7 @@ const app = express();
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.set('view engine', 'ejs');
-
+app.use(express.static(__dirname + '/views'));
 var MongoClient = require('mongodb').MongoClient;
 var port = process.env.PORT || 3000;
 var db;
@@ -40,7 +40,7 @@ app.use(session({
 }));
 
 app.get('/', function (req, res) {
-    res.render('index.ejs');
+    res.render('index.html');
 });
 /*
  app.get('/:create', function (req, res) {
@@ -88,7 +88,6 @@ function displaySession(session_key, res, callback) {
         db.collection(session_key).find(query).toArray(function (err, raised) { //TODO: true false 
             if (err)
                 return console.log(err);
-            console.log(raised);
             data.raised = raised;
             res.render('session.ejs', {data: data});
 
