@@ -127,19 +127,8 @@ app.post('/create_session', function (req, res) {
                         if (err)
                             return console.log(err);
                         console.log('saved to database');
-                        db.collection('session_keys').findOne({session_key: session_info.session_key}, function (err, data) {
-                            if (err)
-                                return console.log(err);
-                            db.collection(session_info.session_key).find({hand: 'raised'}).toArray(function (err, raised) {
-                                if (err)
-                                    return console.log(err);
-                                data.raised = raised;
-                                res.render('session.ejs', {data: data});
 
-
-                            });
-
-                        });
+                        renderSession(session_info.session_key, res);
                         // displaySession(session_info.session_key, res);
                     });
 
@@ -149,12 +138,28 @@ app.post('/create_session', function (req, res) {
         });
     });
 });
-
+/*
 app.get('/session.ejs', function (req, res) {
+    
 
 
+});*/
 
-});
+function renderSession(session_key, page) {
+    db.collection('session_keys').findOne({session_key: session_key}, function (err, data) {
+        if (err)
+            return console.log(err);
+        db.collection(session_key).find({hand: {raised:true}}).toArray(function (err, raised) {
+            if (err)
+                return console.log(err);
+            data.raised = raised;
+            page.render('session.ejs', {data: data});
+
+
+        });
+
+    });
+}
 
 app.post('/lead_session', function (req, res) {
     var session_info = req.body;
@@ -188,16 +193,24 @@ app.post('/lead_session', function (req, res) {
     });
 });
 
+app.get('session.ejs', function (req, res) {
+    var session_info = req.body;
+
+});
+
 app.post('/raise_hand', function (req, res) {
     var session_info = req.body;
     var query = {student_name: session_info.student_name};
     var hand = {raised: true};
     hand.time = (new Date()).getTime();
-    var update = {$set: hand};
+    var update = {$set: {"hand": hand}};
     db.collection(session_info.session_key).updateOne(query, update, function (err, data) {
         if (err)
             console.log(err);
-        res.render('raise.ejs', {data: data});
+        console.log('-----------------------------------------------------------------------------');
+        console.log(data);
+        renderRaise(session_info.session_key, session_info.student_name, res);
+
 
     });
 });
@@ -210,6 +223,19 @@ app.get('/session.html', function (req, res) {
         console.log(res);
     });
 });
+
+/**
+ * 
+ * @param session_key
+ * @param student_name
+ * @param page
+ */
+function renderRaise(session_key, student_name, page) {
+    db.collection(session_key).findOne({student_name: student_name}, function (err, document) {
+        console.log(document);
+        page.render('raise.ejs', {data: document});
+    });
+}
 
 function doesSessionExist(session_key, callback) {
     var boolExists;

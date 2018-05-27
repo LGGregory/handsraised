@@ -1,10 +1,12 @@
 <html>
 <head>
-	<!--<meta http-equiv="refresh" content="10" />-->
+	<meta http-equiv="refresh" content="0; url=raise.ejs?session_key=<%= data.session_key %>" content="10" />
 <title>Handsraised</title>
 </head>
 <body>
-<div name="handraised"><% if(data.hand!=null){   %><%= hand.raised %> <%}%></div>
+<% var raised %>
+<% if(data.hand!=null){ raised = data.hand.raised } else { raised = 'false'} %> 
+<div name="handraised"><%= raised %></div>
 <form action="/raise_hand" method="POST">
 <input type="hidden" name="student_name" value="<%= data.student_name %>">
 <input type="hidden" name="session_key" value="<%= data.session_key %>">
