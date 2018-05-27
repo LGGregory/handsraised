@@ -4,9 +4,10 @@
 <title>Handsraised</title>
 </head>
 <body>
-<div name="handraised"></div>
+<div name="handraised"><% if(data.hand!=null){   %><%= hand.raised %> <%}%></div>
 <form action="/raise_hand" method="POST">
-<input type="hidden" name="student_name" value=""><input type="hidden" name="session_key" value="">
+<input type="hidden" name="student_name" value="<%= data.student_name %>">
+<input type="hidden" name="session_key" value="<%= data.session_key %>">
 <button type="submit">Raise your hand.</button>
 </form>
 </body>
