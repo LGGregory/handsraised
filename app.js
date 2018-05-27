@@ -28,9 +28,6 @@ MongoClient.connect(mongoURL, function (err, client) {
 
     app.use(session({
         secret: 'handsraised',
-        genid: function (req) {
-            return genuuid(); // use UUIDs for session IDs
-        },
         saveUninitialized: false, // don't create session until something stored
         resave: false, //don't save session if unmodified
         store: new MongoStore({
@@ -119,7 +116,7 @@ app.post('/create_session', function (req, res) {
                         if (err)
                             return console.log(err);
                         console.log('saved to database');
-
+                        req.session.session_key=session_info.session_key;
                         renderSession(session_info.session_key, res);
                         // displaySession(session_info.session_key, res);
                     });
@@ -130,18 +127,26 @@ app.post('/create_session', function (req, res) {
         });
     });
 });
-/*
+
 app.get('/session.ejs', function (req, res) {
-    
+    if (req.session.session_key) {
+
+        displaySession(req.session.session_key, res);
 
 
-});*/
+
+    } else {
+        res.end('How did you get here? <a href="index.ejs">Go Home.</a>');
+    }
+
+
+});
 
 function renderSession(session_key, page) {
     db.collection('session_keys').findOne({session_key: session_key}, function (err, data) {
         if (err)
             return console.log(err);
-        db.collection(session_key).find({hand: {raised:true}}).toArray(function (err, raised) {
+        db.collection(session_key).find({hand: {raised: true}}).toArray(function (err, raised) {
             if (err)
                 return console.log(err);
             data.raised = raised;
@@ -166,7 +171,7 @@ app.post('/lead_session', function (req, res) {
                     if (ret) {
                         // Passwords match
                         console.log('Log in.');
-
+                        req.session.session_key=session_info.session_key;
                         displaySession(session_info.session_key, res);
                     } else {
                         // Passwords don't match
