@@ -1,0 +1,19 @@
+<html>
+	<head>
+	<!--<meta http-equiv="refresh" content="10" />-->
+	<title>
+	Session
+	</title>
+	</head>
+	<body>
+	<h1>Session Code: <u><%= data.session_name %></u></h1><br>
+	<h2>Session Code: <u><%= data.session_key %></u></h2><br><br><br>
+	<div name="students">
+		<table name="student_table">
+		<% for(var i = 0; i<data.raised.length; i++) {%>
+		<tr><td name="student_number"><%= i+1%></td><td name="student_name"><%= data.raised[i].student_name %></td><td><button type="submit" name="<%= i%>">Answer</button></td></tr>
+		<% } %>
+		</table>
+	</div>
+	</body>
+</html>

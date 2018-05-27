@@ -3,8 +3,16 @@ const bcrypt = require('bcrypt');
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
+const session = require('express-session');
+const MongoStore = require('connect-mongo')(session);
 const mongoURL = 'mongodb://handsraised:RUHacks2018@ds135750.mlab.com:35750/handsraised';
+
+
+
 app.use(bodyParser.urlencoded({extended: true}));
+
+
+app.set('view engine', 'ejs');
 
 var MongoClient = require('mongodb').MongoClient;
 var port = process.env.PORT || 3000;
@@ -18,25 +26,33 @@ MongoClient.connect(mongoURL, function (err, client) {
         console.log("server is running on port " + port);
     });
 
+    app.use(session({
+        secret: 'handsraised',
+        genid: function (req) {
+            return genuuid() // use UUIDs for session IDs
+        },
+        saveUninitialized: false, // don't create session until something stored
+        resave: false, //don't save session if unmodified
+        store: new MongoStore({
+            db: db,
+            touchAfter: 24 * 3600 // time period in seconds
+        })
+    }));
+
 });
 
+
+
 app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/views/index.html');
+
+    res.render('index.ejs');
 });
 
 app.get('/:create', function (req, res) {
     res.sendFile(__dirname + '/views/' + req.params.create);
 
 });
-/*
- app.get('/session.html', function (req, res) {
- res.sendFile(__dirname + '/views/create.html');
- });
- 
- app.get('/create.html', function (req, res) {
- res.sendFile(__dirname + '/views/create.html');
- });
- */
+
 app.post('/join_session', function (req, res) {
     const session_key = req.body.session_key;
     console.log(session_key);
@@ -49,6 +65,11 @@ app.post('/join_session', function (req, res) {
                         if (err)
                             return console.log(err);
                         console.log('Stored ' + req.body.student_name + " in " + session_key);
+
+
+
+
+
                     });
                 }
             });
@@ -60,6 +81,25 @@ app.post('/join_session', function (req, res) {
 //db.collection(req.body.session_key).find(query).toArray(function(err, results))
     res.sendFile(__dirname + '/views/raise.html');
 });
+
+function displaySession(session_key, res, callback) {
+    db.collection('session_keys').findOne({session_key: session_key}, function (err, data) {
+        if (err)
+            return console.log(err);
+        db.collection(session_key).find({hand: 'raised'}).toArray(function (err, raised) {
+            if (err)
+                return console.log(err);
+            data.raised = raised;
+            res.render('session.ejs', {data: data});
+
+            if (callback != null)
+                callback();
+        });
+
+    });
+
+
+}
 
 app.post('/create_session', function (req, res) {
     var session_info = req.body;
@@ -82,15 +122,37 @@ app.post('/create_session', function (req, res) {
 
                 } else {
                     //then the session does not exist and we can create it
-                    db.collection('session_keys').save(session_info, function (err, res) {
+                    db.collection('session_keys').save(session_info, function (err, ret) {
                         if (err)
                             return console.log(err);
                         console.log('saved to database');
+                        db.collection('session_keys').findOne({session_key: session_info.session_key}, function (err, data) {
+                            if (err)
+                                return console.log(err);
+                            db.collection(session_info.session_key).find({hand: 'raised'}).toArray(function (err, raised) {
+                                if (err)
+                                    return console.log(err);
+                                data.raised = raised;
+                                res.render('session.ejs', {data: data});
+
+                                
+                            });
+
+                        });
+                        // displaySession(session_info.session_key, res);
                     });
+
+
                 }
             });
         });
     });
+});
+
+app.get('/session.ejs', function (req, res) {
+
+
+
 });
 
 app.post('/lead_session', function (req, res) {
@@ -102,10 +164,12 @@ app.post('/lead_session', function (req, res) {
 
                 console.log(document);
 
-                bcrypt.compare(session_info.password, document.passhash, function (err, res) {
-                    if (res) {
+                bcrypt.compare(session_info.password, document.passhash, function (err, ret) {
+                    if (ret) {
                         // Passwords match
                         console.log('Log in.');
+
+                        displaySession(session_info.session_key, res);
                     } else {
                         // Passwords don't match
                         console.log('No log in');
